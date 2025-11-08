@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// 추가
-import AuthCallback from "@/components/AuthCallback";
+import AuthCallback from "@/components/AuthCallback";   // 로그인 콜백(해시+코드)
+import NavAuth from "@/components/NavAuth";             // 로그인/로그아웃 UI
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,12 +23,10 @@ export const metadata: Metadata = {
 
 function Header() {
   return (
-    <header className="p-4 border-b flex gap-4">
+    <header className="p-4 border-b flex justify-between items-center">
       <Link href="/">SeoulTech Market</Link>
-      <nav className="flex gap-4 ml-4">
-        <Link href="/auth">로그인</Link>
-        <Link href="/auth/logout">로그아웃</Link>
-      </nav>
+      {/* 로그인 상태 표시/제어 */}
+      <NavAuth />
     </header>
   );
 }
@@ -39,9 +37,8 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/*  해시/코드 콜백 전역 처리 */}
+        {/* 로그인 콜백 전역 처리 */}
         <AuthCallback />
-
         <Header />
         {children}
       </body>
