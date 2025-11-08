@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// 추가: 해시 토큰 캐처
-import AuthHashCatcher from "@/components/AuthHashCatcher";
+// 추가
+import AuthCallback from "@/components/AuthCallback";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +21,6 @@ export const metadata: Metadata = {
   description: "Campus marketplace",
 };
 
-// 상단 헤더 (홈/로그인/로그아웃 링크)
 function Header() {
   return (
     <header className="p-4 border-b flex gap-4">
@@ -40,8 +39,8 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* 추가: 매직링크가 #access_token=... 형태로 열릴 때 자동으로 세션 설정 */}
-        <AuthHashCatcher />
+        {/*  해시/코드 콜백 전역 처리 */}
+        <AuthCallback />
 
         <Header />
         {children}
