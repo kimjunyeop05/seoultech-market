@@ -4,6 +4,9 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+// 추가: 해시 토큰 캐처
+import AuthHashCatcher from "@/components/AuthHashCatcher";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -37,6 +40,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* 추가: 매직링크가 #access_token=... 형태로 열릴 때 자동으로 세션 설정 */}
+        <AuthHashCatcher />
+
         <Header />
         {children}
       </body>
