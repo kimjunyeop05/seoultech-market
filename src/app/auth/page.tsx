@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -8,16 +9,22 @@ const supabase = createClient(
 );
 
 export default function AuthPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
+
+  // 이미 로그인되어 있으면 /sell로
+  useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) router.replace('/sell');
+    })();
+  }, [router]);
+
   const onSend = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg('메일 전송 중…');
-    const redirectTo =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/auth/confirm`
-        : `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://seoultech-market.vercel.app'}/auth/confirm`;
-
+    const redirectTo = `${window.location.origin}/auth/confirm`;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: redirectTo },
