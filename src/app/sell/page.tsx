@@ -1,72 +1,123 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
+
+function getPublicUrl(path: string | null) {
+  if (!path) return null;
+  const { data } = supabase.storage.from('item-images').getPublicUrl(path);
+  return data.publicUrl;
+}
 
 export default function SellPage() {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
+  const [me, setMe] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState<number | ''>('');
+  const [desc, setDesc] = useState('');
   const [file, setFile] = useState<File | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  // 로그인 필수 가드
+  // 로그인 체크
   useEffect(() => {
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.replace('/auth');
-        return;
-      }
-      setReady(true);
-    })();
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data.session?.user?.id ?? null;
+      setMe(uid);
+      if (!uid) router.replace('/auth');
+    });
   }, [router]);
 
-  if (!ready) return <main className="p-6">확인 중…</main>;
-
-  const sanitize = (n:string)=> n.normalize('NFKD').replace(/[^\w.\-]+/g,'_');
-
-  const onSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setMsg(null);
+    if (!me) return;
+    if (!title || !price || !file) {
+      alert('제목/가격/이미지를 입력하세요.');
+      return;
+    }
+    setBusy(true);
 
-    const { data:{ user } } = await supabase.auth.getUser();
-    if (!user) { router.replace('/auth'); return; }
-
-    let image_path: string | null = null;
-    if (file) {
-      const key = `${user.id}/${Date.now()}-${sanitize(file.name)}`;
-      const { error: upErr } = await supabase.storage.from('item-images').upload(key, file, { contentType: file.type });
-      if (upErr) { setMsg(upErr.message); return; }
-      image_path = key;
+    // 1) 이미지 업로드
+    const path = `${me}/${Date.now()}-${file.name}`;
+    const { error: upErr } = await supabase
+      .storage.from('item-images')
+      .upload(path, file, { cacheControl: '3600', upsert: false });
+    if (upErr) {
+      setBusy(false);
+      alert('이미지 업로드 실패: ' + upErr.message);
+      return;
     }
 
-    const { error: insErr } = await supabase.from('items').insert({
-      seller_id: user.id, title, price: Number(price), image_path
-    });
-    if (insErr) { setMsg(insErr.message); return; }
+    // 2) DB insert
+    const { error: dbErr, data } = await supabase
+      .from('items')
+      .insert({
+        seller_id: me,                   // RLS: auth.uid() = seller_id
+        title,
+        price: Number(price),
+        description: desc,
+        image_path: path,
+      })
+      .select('id')
+      .single();
 
-    //  등록 후 홈으로
-    router.replace('/');
-  };
+    setBusy(false);
+
+    if (dbErr) {
+      alert('등록 실패: ' + dbErr.message);
+      return;
+    }
+
+    alert('등록 완료!');
+    router.push(`/items/${data.id}`); // 상세로 이동
+  }
 
   return (
-    <main className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl mb-4">상품 등록</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <input className="border px-3 py-2" placeholder="제목" value={title} onChange={(e)=>setTitle(e.target.value)} required />
-        <input className="border px-3 py-2" type="number" min={0} placeholder="가격(원)" value={price}
-               onChange={(e)=>setPrice(e.target.value===''?'':Number(e.target.value))} required />
-        <input className="border px-3 py-2" type="file" accept="image/*" onChange={(e)=>setFile(e.target.files?.[0] ?? null)} />
-        <button className="border px-4 py-2">등록</button>
+    <main className="p-6 max-w-xl mx-auto">
+      <h1 className="text-xl font-semibold mb-4">물건 등록</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <input
+          className="border px-3 py-2"
+          placeholder="제목"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          className="border px-3 py-2"
+          type="number"
+          min={0}
+          placeholder="가격(원)"
+          value={price}
+          onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
+        />
+        <textarea
+          className="border px-3 py-2"
+          placeholder="설명"
+          rows={4}
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+        <input
+          className="border px-3 py-2"
+          type="file"
+          accept="image/*"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        />
+
+        <button
+          disabled={busy}
+          className="border px-4 py-2 disabled:opacity-60"
+        >
+          {busy ? '등록 중…' : '등록하기'}
+        </button>
       </form>
-      {msg && <p className="mt-3">{msg}</p>}
+
+      {/* 미리보기 (선택) */}
+      {file && (
+        <div className="mt-4 text-sm opacity-70">
+          업로드 예정: {file.name}
+        </div>
+      )}
     </main>
   );
 }
