@@ -4,10 +4,15 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
-function getPublicUrl(path: string | null) {
-  if (!path) return null;
-  const { data } = supabase.storage.from('item-images').getPublicUrl(path);
-  return data.publicUrl;
+// Storage 키를 안전하게 만드는 유틸 (한글/특수문자 → _)
+function makeSafeKey(userId: string, file: File) {
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const base = file.name.replace(/\.[^/.]+$/, '');
+  const safeBase = base
+    .normalize('NFKD')           // 유니코드 분해
+    .replace(/[^\w.-]/g, '_')    // 영문/숫자/._- 만 허용, 나머지는 _
+    .slice(0, 40);               // 과도한 길이 방지
+  return `${userId}/${Date.now()}-${safeBase}.${ext}`;
 }
 
 export default function SellPage() {
@@ -31,17 +36,24 @@ export default function SellPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
-    if (!title || !price || !file) {
+    if (!title || price === '' || !file) {
       alert('제목/가격/이미지를 입력하세요.');
       return;
     }
+
     setBusy(true);
 
-    // 1) 이미지 업로드
-    const path = `${me}/${Date.now()}-${file.name}`;
+    // 1) 이미지 업로드 (안전한 key 사용)
+    const key = makeSafeKey(me, file);
     const { error: upErr } = await supabase
-      .storage.from('item-images')
-      .upload(path, file, { cacheControl: '3600', upsert: false });
+      .storage
+      .from('item-images')
+      .upload(key, file, {
+        contentType: file.type || 'image/jpeg',
+        cacheControl: '3600',
+        upsert: false,
+      });
+
     if (upErr) {
       setBusy(false);
       alert('이미지 업로드 실패: ' + upErr.message);
@@ -56,7 +68,7 @@ export default function SellPage() {
         title,
         price: Number(price),
         description: desc,
-        image_path: path,
+        image_path: key,                 // 업로드한 storage 경로를 저장
       })
       .select('id')
       .single();
@@ -88,7 +100,9 @@ export default function SellPage() {
           min={0}
           placeholder="가격(원)"
           value={price}
-          onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
+          onChange={(e) =>
+            setPrice(e.target.value === '' ? '' : Number(e.target.value))
+          }
         />
         <textarea
           className="border px-3 py-2"
@@ -112,7 +126,7 @@ export default function SellPage() {
         </button>
       </form>
 
-      {/* 미리보기 (선택) */}
+      {/* 미리보기 */}
       {file && (
         <div className="mt-4 text-sm opacity-70">
           업로드 예정: {file.name}

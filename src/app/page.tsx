@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 type Item = {
@@ -18,83 +18,91 @@ function publicUrl(path: string | null) {
   return data.publicUrl;
 }
 
-export default function HomePage() {
-  const [q, setQ] = useState('');
+type OrderKey = 'latest' | 'priceAsc' | 'priceDesc';
+
+export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
+  const [keyword, setKeyword] = useState('');
+  const [order, setOrder] = useState<OrderKey>('latest');
   const [loading, setLoading] = useState(true);
 
-  async function fetchItems(keyword = '') {
+  async function fetchItems() {
     setLoading(true);
     let query = supabase
       .from('items')
-      .select('id,title,price,image_path,created_at')
-      .order('created_at', { ascending: false });
+      .select('id,title,price,image_path,created_at');
 
-    if (keyword) {
-      query = query.ilike('title', `%${keyword}%`);
-    }
+    // 정렬
+    if (order === 'latest') query = query.order('created_at', { ascending: false });
+    if (order === 'priceAsc') query = query.order('price', { ascending: true });
+    if (order === 'priceDesc') query = query.order('price', { ascending: false });
 
-    const { data, error } = await query;
-    if (!error && data) setItems(data as Item[]);
+    const { data } = await query;
+    setItems((data as Item[]) ?? []);
     setLoading(false);
   }
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
+  useEffect(() => { fetchItems(); }, [order]);
 
-  const list = useMemo(
-    () =>
-      items.map((it) => ({
-        ...it,
-        thumb: publicUrl(it.image_path),
-      })),
-    [items]
-  );
+  // 클라이언트에서 간단 검색(제목 기준)
+  const filtered = useMemo(() => {
+    const q = keyword.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter(it => it.title.toLowerCase().includes(q));
+  }, [items, keyword]);
 
   return (
-    <main className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">최근 등록</h1>
-        <Link href="/sell" className="underline">등록하기</Link>
-      </div>
+    <main className="p-6 max-w-6xl mx-auto">
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xl font-semibold mr-auto">최근 등록</h2>
 
-      <div className="flex gap-2 mb-4">
         <input
-          className="border px-3 py-2 flex-1"
+          className="border px-3 py-2 w-[360px]"
           placeholder="검색(제목)"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && fetchItems(q)}
+          value={keyword}
+          onChange={(e)=>setKeyword(e.target.value)}
         />
-        <button className="border px-4" onClick={() => fetchItems(q)}>검색</button>
+
+        <select
+          className="border px-2 py-2"
+          value={order}
+          onChange={(e)=>setOrder(e.target.value as OrderKey)}
+        >
+          <option value="latest">최신순</option>
+          <option value="priceAsc">가격↑</option>
+          <option value="priceDesc">가격↓</option>
+        </select>
+
+        <Link href="/sell" className="border px-3 py-2">등록하기</Link>
       </div>
 
       {loading ? (
         <div>불러오는 중…</div>
-      ) : list.length === 0 ? (
-        <div>등록된 물건이 없습니다.</div>
       ) : (
-        <ul className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {list.map((it) => (
-            <li key={it.id} className="border p-2">
-              <Link href={`/items/${it.id}`}>
-                <div className="aspect-square bg-gray-100 mb-2 overflow-hidden">
-                  {it.thumb ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.thumb} alt={it.title} className="w-full h-full object-cover" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {filtered.map((it) => {
+            const img = publicUrl(it.image_path);
+            return (
+              <Link
+                key={it.id}
+                href={`/items/${it.id}`}                 //  상세 페이지로 이동
+                className="border block hover:shadow-md transition"
+              >
+                <div className="aspect-square bg-gray-100 overflow-hidden">
+                  {img ? (
+                    <img src={img} alt={it.title} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-sm opacity-60">
-                      이미지 없음
-                    </div>
+                    <div className="w-full h-full flex items-center justify-center opacity-60">이미지 없음</div>
                   )}
                 </div>
-                <div className="font-medium">{it.title}</div>
-                <div className="text-sm opacity-70">{it.price.toLocaleString()} 원</div>
+                <div className="p-3">
+                  <div className="font-medium">{it.title}</div>
+                  <div className="text-sm">{it.price.toLocaleString()} 원</div>
+                </div>
               </Link>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
     </main>
   );
