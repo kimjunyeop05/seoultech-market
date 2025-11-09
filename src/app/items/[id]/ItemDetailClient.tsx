@@ -44,7 +44,7 @@ export default function ItemDetailClient({ id }: { id: string }) {
       const [itRes, sess] = await Promise.all([
         supabase
           .from('items')
-          .select('id,title,price,image_path,created_at') // ← description 제거
+          .select('id,title,price,image_path,created_at') //  description 제거
           .eq('id', id)
           .maybeSingle(),
         supabase.auth.getSession(),
