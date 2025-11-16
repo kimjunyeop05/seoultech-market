@@ -7,7 +7,7 @@ type Item = {
   id: string;
   title: string;
   price: number;
-  // description: string | null; // ← 테이블에 없으므로 제외
+  description: string | null; 
   image_path: string | null;
   created_at: string;
 };
@@ -44,7 +44,7 @@ export default function ItemDetailClient({ id }: { id: string }) {
       const [itRes, sess] = await Promise.all([
         supabase
           .from('items')
-          .select('id,title,price,image_path,created_at') //  description 제거
+          .select('id,title,price,description,image_path,created_at') //  description 제거
           .eq('id', id)
           .maybeSingle(),
         supabase.auth.getSession(),
@@ -118,14 +118,21 @@ export default function ItemDetailClient({ id }: { id: string }) {
         </div>
 
         <div>
-          <h1 className="text-2xl font-semibold mb-2">{item.title}</h1>
-          <div className="text-xl mb-4">{item.price.toLocaleString()} 원</div>
-          {/* description 컬럼이 없으므로 기본 문구 표시 */}
-          <div className="whitespace-pre-wrap leading-relaxed">(설명 없음)</div>
-          <div className="mt-6 text-sm opacity-70">
-            등록일: {new Date(item.created_at).toLocaleString()}
-          </div>
-        </div>
+  <h1 className="text-2xl font-semibold mb-2">{item.title}</h1>
+  <div className="text-xl mb-4">{item.price.toLocaleString()} 원</div>
+
+  {/* 설명: 값이 있으면 보여주고, 없으면 기본 문구 */}
+  <div className="whitespace-pre-wrap leading-relaxed">
+    {item.description && item.description.trim().length > 0
+      ? item.description
+      : '(설명 없음)'}
+  </div>
+
+  <div className="mt-6 text-sm opacity-70">
+    등록일: {new Date(item.created_at).toLocaleString()}
+  </div>
+</div>
+
       </div>
 
       {/* 댓글 */}
