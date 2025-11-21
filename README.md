@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SeoulTech Market (Campus Marketplace)
 
-## Getting Started
+> Next.js + Supabase로 만든 캠퍼스 중고거래 웹앱  
+> 데모(프로덕션): https://<your-vercel-domain>.vercel.app
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 📌 프로젝트 개요
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **목표**: 학내/소규모 커뮤니티용 중고거래 서비스를 단기간에 구현
+- **핵심 기능**
+  - 이메일 매직링크 기반 로그인
+  - 물건 등록(제목/가격/설명/이미지)
+  - 목록 조회 + 검색(제목) + 정렬(최신/가격↑/가격↓)
+  - 상세 페이지(이미지/설명/등록일) + 댓글(작성자 이메일 표시)
+  - 작성자 본인에 한해 **수정/삭제**, **거래완료(is_sold) 토글**
+- **배포**: Vercel
+- **DB/스토리지/인증**: Supabase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧱 기술 스택
 
-## Learn More
+- **Frontend**: Next.js (App Router), React, TypeScript, Tailwind
+- **Auth/DB/Storage**: Supabase (PostgreSQL, Auth, Storage)
+- **Deploy**: Vercel
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🗂️ 디렉터리(주요)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
