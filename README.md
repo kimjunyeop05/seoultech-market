@@ -3,7 +3,7 @@
 > 서울과기대 학생들을 위한 간단한 중고거래 웹앱. **Next.js(App Router) + Supabase**로 로그인(매직링크), 상품 등록/목록/검색/정렬, 상세 보기, 댓글(거래 문의)까지 구현했습니다.
 
 <p align="center">
-  <img src="docs/hero.png" width="820" alt="SeoulTech Market hero preview"/>
+  <img src="docs/hero.png" width="820" alt="[SeoulTech Market hero preview](https://seoultech-market-5iae-pcfp2eh8w-kimjunyeop05s-projects.vercel.app/)"/>
 </p>
 
 <div align="center">
