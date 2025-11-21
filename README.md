@@ -28,4 +28,17 @@
 ---
 
 ## 🗂️ 디렉터리(주요)
+src/
+app/
+page.tsx # 목록/검색/정렬/등록 버튼
+sell/page.tsx # 물건 등록 페이지(이미지 업로드 + DB insert)
+items/[id]/
+page.tsx # 서버 래퍼(라우팅 params 전달)
+ItemDetailClient.tsx # 상세/댓글/수정/삭제/거래완료 UI/로직
+lib/
+supabaseClient.ts # createClient 1회 생성
+public/
+## 🔐 환경 변수
+
+Vercel **Project Settings → Environment Variables** 또는 로컬 `.env.local`
 
