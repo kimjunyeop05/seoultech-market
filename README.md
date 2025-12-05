@@ -14,7 +14,8 @@
 - Supabase의 **Auth / Postgres / Storage**, 공개 URL을 활용한 이미지 표시, RLS 정책으로 보안 제어.
 
 > 스크린샷(홈): `docs/hero.png`  
-> `![Home](docs/hero.png)`
+> <img width="1919" height="980" alt="첫화면" src="https://github.com/user-attachments/assets/a54e4f2b-97ab-46be-98f2-ec3cbd4ef651" />
+
 
 ---
 
