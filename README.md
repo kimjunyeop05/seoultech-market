@@ -39,9 +39,8 @@
 - **댓글**: 로그인 사용자가 글에 댓글 작성
 - 로그인 전
 - <img width="927" height="826" alt="상세페이지댓글" src="https://github.com/user-attachments/assets/4f4c9353-8c23-4547-82e7-3fcf23528e17" />
- 로그인 후
+- 로그인 후
 <img width="1389" height="818" alt="로그인 후 화면" src="https://github.com/user-attachments/assets/e0471b6b-48dc-4c79-b35e-4dc5e38b4ef4" />
-
 
 - **인증**: Supabase GoTrue(매직링크)
 - <img width="1536" height="683" alt="로그인화면" src="https://github.com/user-attachments/assets/0e3c2a59-810e-4b31-bbf0-f326edfe21f5" />
