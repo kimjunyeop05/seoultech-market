@@ -13,7 +13,7 @@
 - 상세 페이지에서 설명/이미지/댓글을 확인하고 **로그인한 사용자 누구나 댓글**을 작성할 수 있습니다.
 - Supabase의 **Auth / Postgres / Storage**, 공개 URL을 활용한 이미지 표시, RLS 정책으로 보안 제어.
 
-> 스크린샷(홈): `docs/hero.png`  
+> 스크린샷(홈)  
 > <img width="1919" height="980" alt="첫화면" src="https://github.com/user-attachments/assets/a54e4f2b-97ab-46be-98f2-ec3cbd4ef651" />
 
 
@@ -30,16 +30,17 @@
 ## 3) 주요 기능
 
 - **목록/검색/정렬**: 제목 검색, 가격↑/가격↓, 최신순
+- ![목록검색](https://github.com/user-attachments/assets/bfb0c701-9d24-40a8-8ac7-4db35690dbbd)
+
 - **물건 등록**: 이미지 업로드(Storage) → `image_path` 저장
+- <img width="1904" height="724" alt="물건등록" src="https://github.com/user-attachments/assets/adba79fe-344e-4a56-867f-6c3f2a21f3dc" />
+
 - **상세 페이지**: 제목/가격/설명/등록일/이미지 표시
 - **댓글**: 로그인 사용자가 글에 댓글 작성
-- **인증**: Supabase GoTrue(매직링크)
+- <img width="927" height="826" alt="상세페이지댓글" src="https://github.com/user-attachments/assets/4f4c9353-8c23-4547-82e7-3fcf23528e17" />
 
-> 스크린샷 권장
->
-> - 목록 + 검색/정렬: `docs/list_search_sort.png`
-> - 등록 폼: `docs/sell_form.png`
-> - 상세 + 댓글: `docs/detail_with_comments.png`
+- **인증**: Supabase GoTrue(매직링크)
+- <img width="1536" height="683" alt="로그인화면" src="https://github.com/user-attachments/assets/0e3c2a59-810e-4b31-bbf0-f326edfe21f5" />
 
 ---
 
@@ -90,85 +91,14 @@ docs/
 - **comments**
   - `id (uuid, pk)`, `item_id (uuid, fk)`, `author_id (uuid, not null)`,  
     `author_email (text)`, `content (text)`, `created_at (timestamptz default now())`
-
-> 스크린샷: `docs/schema_tables.png`
+<img width="1905" height="360" alt="table" src="https://github.com/user-attachments/assets/141212fa-0ba1-4b3f-8e04-3489d2cf0ae6" />
 
 ---
 
 ## 7) 보안 정책(RLS/Storage)
 
 - **items**
-  - `select`: 모두 허용(데모 목적)
-  - `insert`: `auth.uid() = seller_id` (본인 소유만 등록)
-- **comments**
-  - `select`: 모두 허용
-  - `insert`: `auth.uid()`인 사용자만
-- **Storage (`item-images` 버킷)**
-  - 업로드: `authenticated`
-  - 읽기: `public` (목록/상세 이미지 표시)
-
-> 정책 화면 스크린샷: `docs/rls.png`, `docs/storage_policies.png`
-
----
-
-## 8) 환경 변수
-
-루트에 `.env.local`:
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6...
-```
-
-Vercel 설정: Project → **Settings → Environment Variables** 에 동일 값 등록  
-> 스크린샷: `docs/vercel_env.png`
-
----
-
-## 9) 실행 & 배포
-
-```bash
-# install
-npm i
-
-# dev
-npm run dev
-
-# build
-npm run build
-```
-
-- GitHub 연결 시 Vercel이 자동 배포(Production/Preview)
-- 배포 이력은 Vercel Deployments에서 확인
-
-> 스크린샷: `docs/vercel_deploys.png`
-
----
-
-## 10) 구현 상세
-
-- **AuthCallback.tsx**  
-  매직링크 리다이렉트 후 URL 해시/쿼리에서 세션 교환 → Supabase 클라이언트에 세션 저장.
-- **이미지 업로드(sell/page.tsx)**  
-  `storage.upload(path, file)` → 에러 처리 → 성공 시 DB `items`에 `image_path` 저장.
-- **상세/댓글(ItemDetailClient.tsx)**  
-  `items`에서 항목 조회, `comments`에서 댓글 목록 → 로그인 상태면 입력 가능, `insert` 후 목록 갱신.
-- **검색/정렬(page.tsx)**  
-  제목 기반 클라이언트 필터 + Supabase `order`로 가격/생성일 정렬.
-
----
-
-## 11) 스크린샷 갤러리
-
-- `docs/hero.png` – 홈(검색/정렬/카드)
-- `docs/list_search_sort.png` – 검색/정렬 UI
-- `docs/sell_form.png` – 등록 폼(파일 선택)
-- `docs/detail_with_comments.png` – 상세 + 댓글
-- `docs/schema_tables.png`, `docs/rls.png`, `docs/storage_policies.png`
-- `docs/vercel_env.png`, `docs/vercel_deploys.png`
-
----
-
-## 12) 로드맵
+  - `s표
 
 - [ ] 내 물건 관리(수정/삭제)
 - [ ] 즐겨찾기, 판매자 프로필
