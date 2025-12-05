@@ -98,7 +98,67 @@ docs/
 ## 7) 보안 정책(RLS/Storage)
 
 - **items**
-  - `s표
+  - `select`: 모두 허용(데모 목적)
+  - `insert`: `auth.uid() = seller_id` (본인 소유만 등록)
+- **comments**
+  - `select`: 모두 허용
+  - `insert`: `auth.uid()`인 사용자만
+- **Storage (`item-images` 버킷)**
+  - 업로드: `authenticated`
+  - 읽기: `public` (목록/상세 이미지 표시)
+
+---
+
+## 8) 환경 변수
+
+루트에 `.env.local`:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6...
+```
+Vercel 설정: Project → **Settings → Environment Variables** 에 동일 값 등록  
+
+---
+
+## 9) 실행 & 배포
+
+```bash
+# install
+npm i
+
+# dev
+npm run dev
+
+# build
+npm run build
+
+```
+
+- GitHub 연결 시 Vercel이 자동 배포(Production/Preview)
+
+- 배포 이력은 Vercel Deployments에서 확인
+
+---
+
+## 10) 구현 상세
+
+- **AuthCallback.tsx**  
+
+  매직링크 리다이렉트 후 URL 해시/쿼리에서 세션 교환 → Supabase 클라이언트에 세션 저장.
+
+- **이미지 업로드(sell/page.tsx)**  
+
+  `storage.upload(path, file)` → 에러 처리 → 성공 시 DB `items`에 `image_path` 저장.
+
+- **상세/댓글(ItemDetailClient.tsx)**  
+
+  `items`에서 항목 조회, `comments`에서 댓글 목록 → 로그인 상태면 입력 가능, `insert` 후 목록 갱신.
+
+- **검색/정렬(page.tsx)**  
+
+  제목 기반 클라이언트 필터 + Supabase `order`로 가격/생성일 정렬.
+---
+## 11) 추가적인 목표
 
 - [ ] 내 물건 관리(수정/삭제)
 - [ ] 즐겨찾기, 판매자 프로필
@@ -107,13 +167,13 @@ docs/
 
 ---
 
-## 13) 라이선스
+## 12) 라이선스
 
 MIT
 
 ---
 
-## 14) 참고
+## 13) 참고
 
 - Next.js App Router Docs: https://nextjs.org/docs
 - Supabase Docs: https://supabase.com/docs
