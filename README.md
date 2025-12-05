@@ -3,7 +3,7 @@
 캠퍼스 중고거래 웹앱. **Next.js(App Router) + Supabase(Auth/DB/Storage) + Vercel**로 구현했고,
 로그인(매직링크), 물건 등록(이미지 업로드), 목록 검색/정렬, 상세/댓글을 제공합니다.
 
-> 데모: [바로가기]seoultech-market-dl40ewe3w-kimjunyeop05s-projects.vercel.app
+> 데모: [바로가기](seoultech-market-dl40ewe3w-kimjunyeop05s-projects.vercel.app)
 
 ---
 
